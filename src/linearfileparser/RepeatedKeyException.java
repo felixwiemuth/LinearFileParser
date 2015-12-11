@@ -18,13 +18,20 @@
 package linearfileparser;
 
 /**
- * Indicates that a line starts with the specification of an unknown key.
+ * Indicates that a one-shot key has been used a second time.
  *
  * @author Felix Wiemuth
  */
-public class UnknownKeyException extends IllegalKeyException {
+public class RepeatedKeyException extends IllegalKeyException {
 
-    public UnknownKeyException(int line, String key) {
-        super(line, key, "The key \"" + key + "\" is not known.");
+    private final int firstOccurence;
+
+    public RepeatedKeyException(int line, String key, int firstOccurence) {
+        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurence);
+        this.firstOccurence = firstOccurence;
+    }
+
+    public int getFirstOccurence() {
+        return firstOccurence;
     }
 }

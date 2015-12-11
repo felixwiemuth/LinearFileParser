@@ -90,13 +90,38 @@ public class LinearFileParser {
     public abstract static class KeyProcessor {
 
         public final String key;
+        private final boolean oneShot;
+        private int lastOccurence = -1;
 
         /**
          *
-         * @param key
+         * @param key the key to be processed
+         * @param oneShot whether this key may only be used once in the section
+         * of this processor - when used a second time,
+         * {@link RepeatedKeyException} is thrown
+         */
+        public KeyProcessor(String key, boolean oneShot) {
+            this.key = key;
+            this.oneShot = oneShot;
+        }
+
+        /**
+         *
+         * @param key the key to be processed
          */
         public KeyProcessor(String key) {
-            this.key = key;
+            this(key, false);
+        }
+
+        private void _process(String arg, ListIterator<String> it) throws RepeatedKeyException, ParseException {
+            if (oneShot) {
+                if (lastOccurence != -1) {
+                    throw new RepeatedKeyException(it.nextIndex(), key, lastOccurence);
+                } else {
+                    lastOccurence = it.nextIndex();
+                }
+            }
+            process(arg, it);
         }
 
         /**
@@ -174,11 +199,11 @@ public class LinearFileParser {
             return keyProcessors.containsKey(key);
         }
 
-        public void process(String key, String arg, ListIterator<String> it) throws UnknownKeyException, ParseException {
+        public void process(String key, String arg, ListIterator<String> it) throws UnknownKeyException, RepeatedKeyException, ParseException {
             if (!keyProcessors.containsKey(key)) {
                 throw new UnknownKeyException(getCurrentLineNumber(), key);
             }
-            keyProcessors.get(key).process(arg, it);
+            keyProcessors.get(key)._process(arg, it);
         }
 
         public void enter(ListIterator<String> it) {
@@ -356,12 +381,13 @@ public class LinearFileParser {
      * @param file the file which lines should be parsed
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws IllegalLineException
      * @throws UnknownSectionException
      * @throws UnknownKeyException
+     * @throws RepeatedKeyException
+     * @throws IllegalLineException
      * @throws ParseException
      */
-    protected void _parse(File file) throws FileNotFoundException, IOException, IllegalLineException, UnknownKeyException, UnknownSectionException, ParseException {
+    protected void _parse(File file) throws FileNotFoundException, IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
         reader = new BufferedReader(new FileReader(file));
         List<String> lines = new ArrayList<>();
         while (true) {
@@ -384,13 +410,15 @@ public class LinearFileParser {
      * prefix in a line or by a processor)
      * @throws UnknownKeyException when the parser detects a key which was not
      * registered for all sections or the current section
+     * @throws RepeatedKeyException when the key at the current line is a
+     * one-shot key and it has been used before
      * @throws IllegalLineException when the line was not identified as a
      * comment, a section specification or a key and the default processor (if
      * any) returned false
      * @throws ParseException if not one of the previous, is only thrown by
      * processors
      */
-    protected void _parse(List<String> lines) throws UnknownSectionException, UnknownKeyException, IllegalLineException, ParseException {
+    protected void _parse(List<String> lines) throws UnknownSectionException, UnknownKeyException, RepeatedKeyException, IllegalLineException, ParseException {
         it = lines.listIterator();
         String line;
         section = sections.get(START_SECTION);
@@ -427,7 +455,7 @@ public class LinearFileParser {
         }
     }
 
-    private void parseKey(String line, ListIterator<String> it) throws UnknownKeyException, ParseException {
+    private void parseKey(String line, ListIterator<String> it) throws UnknownKeyException, RepeatedKeyException, ParseException {
         String keyArg = line.substring(keyPrefix.length()); // key with argument
         int endKey = keyArg.indexOf(" ");
         String key = keyArg;

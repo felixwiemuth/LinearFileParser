@@ -18,13 +18,20 @@
 package linearfileparser;
 
 /**
- * Indicates that a line starts with the specification of an unknown key.
+ * Indicates that a key may not be used at the current line.
  *
  * @author Felix Wiemuth
  */
-public class UnknownKeyException extends IllegalKeyException {
+public class IllegalKeyException extends ParseException {
 
-    public UnknownKeyException(int line, String key) {
-        super(line, key, "The key \"" + key + "\" is not known.");
+    private final String key;
+
+    public IllegalKeyException(int line, String key, String msg) {
+        super(line, msg);
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
     }
 }
