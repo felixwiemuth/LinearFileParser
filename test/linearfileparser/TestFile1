@@ -1,0 +1,12 @@
+# This is a comment
+# this too
+@printSection
+@printSection This should give the same result, the argument won't be used
+@print Hello World!
+@print And this?
+@second
+@printSection
+@printThisLine Now we print the whole line, so the argument will still be seen!
+# another comment
+@switchSection first
+@printSection

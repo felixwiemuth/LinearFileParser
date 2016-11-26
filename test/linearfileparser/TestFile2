@@ -1,0 +1,8 @@
+$$asdas
+$print Hello World!
+$$comment only
+$$ also comment
+$$	comment with tab
+
+	
+$print YES!
