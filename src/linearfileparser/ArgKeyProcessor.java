@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package linearfileparser;
 
 import java.util.ListIterator;
@@ -28,6 +27,10 @@ import java.util.ListIterator;
  * @author Felix Wiemuth
  */
 public abstract class ArgKeyProcessor extends LinearFileParser.KeyProcessor {
+
+    public ArgKeyProcessor(String key, boolean oneShot) {
+        super(key, oneShot);
+    }
 
     public ArgKeyProcessor(String key) {
         super(key);
