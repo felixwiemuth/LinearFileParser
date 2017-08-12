@@ -27,7 +27,7 @@ public class RepeatedKeyException extends IllegalKeyException {
     private final int firstOccurrence;
 
     public RepeatedKeyException(int line, String key, int firstOccurrence) {
-        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence);
+        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence + ".");
         this.firstOccurrence = firstOccurrence;
     }
 
