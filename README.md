@@ -25,3 +25,6 @@ LinearFileParser is a simple line-based parser for text files with a custom form
 The parser is "line-based" because its purpose is to dispatch lines to predefined processors while the parsing of content in a line has to be implemented separately.
 LinearFileParser can, for example, be used to parse user-friendly configuration files or import (an unspecified amount of) structured data.
 See the Javadoc of class [LinearFileParser](src/linearfileparser/LinearFileParser.java) for details.
+
+### Example
+To see how LinearFileParser is used in practice, look at the Android app [LinCal](https://github.com/felixwiemuth/LinCal) with its [LinCalParser](https://github.com/felixwiemuth/LinCal/blob/master/app/src/main/java/felixwiemuth/lincal/parser/LinCalParser.java).
