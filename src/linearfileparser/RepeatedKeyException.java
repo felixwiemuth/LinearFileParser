@@ -24,14 +24,14 @@ package linearfileparser;
  */
 public class RepeatedKeyException extends IllegalKeyException {
 
-    private final int firstOccurence;
+    private final int firstOccurrence;
 
-    public RepeatedKeyException(int line, String key, int firstOccurence) {
-        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurence);
-        this.firstOccurence = firstOccurence;
+    public RepeatedKeyException(int line, String key, int firstOccurrence) {
+        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence);
+        this.firstOccurrence = firstOccurrence;
     }
 
-    public int getFirstOccurence() {
-        return firstOccurence;
+    public int getFirstOccurrence() {
+        return firstOccurrence;
     }
 }
