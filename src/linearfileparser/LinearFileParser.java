@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package linearfileparser;
 
 import java.io.BufferedReader;
@@ -91,7 +90,7 @@ public class LinearFileParser {
 
         public final String key;
         private final boolean oneShot;
-        private int lastOccurence = -1;
+        private int lastOccurrence = -1;
 
         /**
          *
@@ -115,10 +114,10 @@ public class LinearFileParser {
 
         private void _process(String arg, ListIterator<String> it) throws RepeatedKeyException, ParseException {
             if (oneShot) {
-                if (lastOccurence != -1) {
-                    throw new RepeatedKeyException(it.nextIndex(), key, lastOccurence);
+                if (lastOccurrence != -1) {
+                    throw new RepeatedKeyException(it.nextIndex(), key, lastOccurrence);
                 } else {
-                    lastOccurence = it.nextIndex();
+                    lastOccurrence = it.nextIndex();
                 }
             }
             process(arg, it);
@@ -328,7 +327,7 @@ public class LinearFileParser {
      * @param sectionID
      * @param keyProcessor
      * @throws SectionNotExistsException if the section specified was not added
-     * wiht {@link #addSection()}
+     * with {@link #addSection()}
      * @throws KeyProcessorAlreadyExistsException if a processor for the
      * specified key was already added to apply to all sections or this section.
      */
