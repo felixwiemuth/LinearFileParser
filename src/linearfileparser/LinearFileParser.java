@@ -21,6 +21,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -386,11 +389,31 @@ public class LinearFileParser {
      * @throws IllegalLineException
      * @throws ParseException
      */
+    protected void _parse(InputStream inputStream) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
+        _parse(new InputStreamReader(inputStream));
+    }
+
+    /**
+     * Convenience method for {@link #_parse(java.util.List)}.
+     *
+     * @param file the file which lines should be parsed
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws UnknownSectionException
+     * @throws UnknownKeyException
+     * @throws RepeatedKeyException
+     * @throws IllegalLineException
+     * @throws ParseException
+     */
     protected void _parse(File file) throws FileNotFoundException, IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
-        reader = new BufferedReader(new FileReader(file));
+        _parse(new FileReader(file));
+    }
+
+    private void _parse(InputStreamReader reader) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
+        BufferedReader bufferedReader = new BufferedReader(reader);
         List<String> lines = new ArrayList<>();
         while (true) {
-            String line = reader.readLine();
+            String line = bufferedReader.readLine();
             if (line == null) {
                 break;
             }
