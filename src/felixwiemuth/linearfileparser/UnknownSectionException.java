@@ -15,23 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
- * Indicates that a one-shot key has been used a second time.
+ * Indicates an attempt to switch to a section which was not defined.
  *
  * @author Felix Wiemuth
  */
-public class RepeatedKeyException extends IllegalKeyException {
+public class UnknownSectionException extends ParseException {
 
-    private final int firstOccurrence;
+    private final String sectionID;
 
-    public RepeatedKeyException(int line, String key, int firstOccurrence) {
-        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence + ".");
-        this.firstOccurrence = firstOccurrence;
+    public UnknownSectionException(int line, String sectionID) {
+        super(line, "The section \"" + sectionID + "\" is not known.");
+        this.sectionID = sectionID;
     }
 
-    public int getFirstOccurrence() {
-        return firstOccurrence;
+    public String getSectionID() {
+        return sectionID;
     }
 }

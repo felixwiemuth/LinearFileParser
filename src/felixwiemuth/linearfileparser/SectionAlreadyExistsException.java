@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
  *
  * @author Felix Wiemuth
  */
-public class KeyProcessorAlreadyExistsException extends RuntimeException {
+public class SectionAlreadyExistsException extends RuntimeException {
 
 }

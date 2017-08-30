@@ -15,21 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
- * Indicates that an argument is required for a key but not given.
+ * Indicates that a one-shot key has been used a second time.
+ *
+ * @author Felix Wiemuth
  */
-public class MissingArgumentException extends ParseException {
+public class RepeatedKeyException extends IllegalKeyException {
 
-    private final String key;
+    private final int firstOccurrence;
 
-    public MissingArgumentException(int line, String key) {
-        super(line, "Missing argument for key \"" + key + "\".");
-        this.key = key;
+    public RepeatedKeyException(int line, String key, int firstOccurrence) {
+        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence + ".");
+        this.firstOccurrence = firstOccurrence;
     }
 
-    public String getKey() {
-        return key;
+    public int getFirstOccurrence() {
+        return firstOccurrence;
     }
 }

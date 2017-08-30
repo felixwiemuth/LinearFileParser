@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
  * Indicates that a line starts with the specification of an unknown key.

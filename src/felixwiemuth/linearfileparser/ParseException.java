@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
  * Indicates an error while parsing due to a not properly formatted source file

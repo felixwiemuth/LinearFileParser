@@ -15,17 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
- * Indicates that a line is neither a comment, nor specifies a section or a key
- * and the default processor did not accept the line.
+ * Indicates that a key may not be used at the current line.
  *
  * @author Felix Wiemuth
  */
-public class IllegalLineException extends ParseException {
+public class IllegalKeyException extends ParseException {
 
-    public IllegalLineException(int line) {
-        super(line, "Illegal start of line (expected comment, section or key).");
+    private final String key;
+
+    public IllegalKeyException(int line, String key, String msg) {
+        super(line, msg);
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

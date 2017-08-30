@@ -15,28 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
+ * Indicates that a line is neither a comment, nor specifies a section or a key
+ * and the default processor did not accept the line.
  *
  * @author Felix Wiemuth
  */
-public class SectionNotExistsException extends RuntimeException {
+public class IllegalLineException extends ParseException {
 
-    /**
-     * Creates a new instance of <code>SectionNotExistsException</code> without
-     * detail message.
-     */
-    public SectionNotExistsException() {
-    }
-
-    /**
-     * Constructs an instance of <code>SectionNotExistsException</code> with the
-     * specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public SectionNotExistsException(String msg) {
-        super(msg);
+    public IllegalLineException(int line) {
+        super(line, "Illegal start of line (expected comment, section or key).");
     }
 }

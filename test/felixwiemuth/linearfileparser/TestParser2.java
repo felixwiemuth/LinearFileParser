@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,12 +26,12 @@ import java.util.ListIterator;
  *
  * @author Felix Wiemuth
  */
-public class TestParser1 extends LinearFileParser {
+public class TestParser2 extends LinearFileParser {
 
-    public TestParser1() {
-        super("#", "@", "@", "first", true);
+    public TestParser2() {
+        super("$$", "$");
 
-        // sections
+        // Add sections, should have no effect
         addSection("first", new Action() {
             @Override
             public void run(ListIterator<String> it) {
@@ -70,31 +70,18 @@ public class TestParser1 extends LinearFileParser {
         addKeyProcessor(new KeyProcessor("switchSection") {
             @Override
             public void process(String arg, ListIterator it) throws ParseException {
-                System.out.println("### Manual switch section ###");
-                changeSection(arg);
+                changeSection("first");
             }
         });
 
         // local keys
-        addKeyProcessor("first", new KeyProcessor("printSection") {
-            @Override
-            public void process(String arg, ListIterator it) throws ParseException {
-                System.out.println("Current section at line " + (it.previousIndex() + 1) + ": FIRST");
-            }
-        });
         addKeyProcessor("second", new KeyProcessor("printSection") {
             @Override
             public void process(String arg, ListIterator it) throws ParseException {
                 System.out.println("Current section at line " + (it.previousIndex() + 1) + ": SECOND");
             }
         });
-        addKeyProcessor("second", new KeyProcessor("printThisLine") {
-            @Override
-            public void process(String arg, ListIterator it) throws ParseException {
-                System.out.println("Current line: " + it.previous());
-                it.next();
-            }
-        });
+
     }
 
     public void parse(File file) throws IOException, FileNotFoundException, UnknownKeyException, UnknownSectionException, ParseException {

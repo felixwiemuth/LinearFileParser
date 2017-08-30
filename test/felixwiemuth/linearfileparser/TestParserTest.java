@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,7 +47,7 @@ public class TestParserTest {
     @Test
     public void test1() throws IOException, FileNotFoundException, UnknownSectionException, ParseException {
         TestParser1 parser = new TestParser1();
-        parser.parse(new File("test/linearfileparser/TestFile1"));
+        parser.parse(new File("test/felixwiemuth/linearfileparser/TestFile1"));
     }
 
     /**
@@ -62,7 +62,7 @@ public class TestParserTest {
     @Test
     public void test2() throws IOException, FileNotFoundException, UnknownSectionException, ParseException {
         TestParser2 parser = new TestParser2();
-        parser.parse(new File("test/linearfileparser/TestFile2"));
+        parser.parse(new File("test/felixwiemuth/linearfileparser/TestFile2"));
     }
 
     @BeforeClass

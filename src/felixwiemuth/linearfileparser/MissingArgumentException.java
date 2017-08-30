@@ -15,23 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
- * Indicates an attempt to switch to a section which was not defined.
- *
- * @author Felix Wiemuth
+ * Indicates that an argument is required for a key but not given.
  */
-public class UnknownSectionException extends ParseException {
+public class MissingArgumentException extends ParseException {
 
-    private final String sectionID;
+    private final String key;
 
-    public UnknownSectionException(int line, String sectionID) {
-        super(line, "The section \"" + sectionID + "\" is not known.");
-        this.sectionID = sectionID;
+    public MissingArgumentException(int line, String key) {
+        super(line, "Missing argument for key \"" + key + "\".");
+        this.key = key;
     }
 
-    public String getSectionID() {
-        return sectionID;
+    public String getKey() {
+        return key;
     }
 }

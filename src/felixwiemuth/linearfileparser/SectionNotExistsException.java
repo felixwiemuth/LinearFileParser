@@ -15,23 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package linearfileparser;
+package felixwiemuth.linearfileparser;
 
 /**
- * Indicates that a key may not be used at the current line.
  *
  * @author Felix Wiemuth
  */
-public class IllegalKeyException extends ParseException {
+public class SectionNotExistsException extends RuntimeException {
 
-    private final String key;
-
-    public IllegalKeyException(int line, String key, String msg) {
-        super(line, msg);
-        this.key = key;
+    /**
+     * Creates a new instance of <code>SectionNotExistsException</code> without
+     * detail message.
+     */
+    public SectionNotExistsException() {
     }
 
-    public String getKey() {
-        return key;
+    /**
+     * Constructs an instance of <code>SectionNotExistsException</code> with the
+     * specified detail message.
+     *
+     * @param msg the detail message.
+     */
+    public SectionNotExistsException(String msg) {
+        super(msg);
     }
 }
