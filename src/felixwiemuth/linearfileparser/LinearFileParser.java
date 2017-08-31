@@ -405,7 +405,8 @@ public class LinearFileParser {
     }
 
     /**
-     * Convenience method for {@link #_parse(java.util.List)}.
+     * Convenience method for {@link #_parse(java.util.List)}. It assumes UTF-8
+     * encoding for the data provided by the input stream.
      *
      * @param inputStream an input stream providing the lines to be parsed
      * @throws FileNotFoundException
@@ -417,11 +418,14 @@ public class LinearFileParser {
      * @throws ParseException
      */
     protected void _parse(InputStream inputStream) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
-        _parse(new InputStreamReader(inputStream));
+        _parse(new InputStreamReader(inputStream, "UTF-8"));
     }
 
     /**
-     * Convenience method for {@link #_parse(java.util.List)}.
+     * Convenience method for {@link #_parse(java.util.List)}. Note that this
+     * reads the file with the system's default encoding! To use UTF-8, use {@link #_parse(java.io.InputStream)
+     * } and to use a different encoding, use {@link #_parse(java.io.InputStreamReader)
+     * }.
      *
      * @param file the file to be parsed
      * @throws FileNotFoundException
@@ -436,7 +440,19 @@ public class LinearFileParser {
         _parse(new FileReader(file));
     }
 
-    private void _parse(InputStreamReader reader) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
+    /**
+     * Convenience method for {@link #_parse(java.util.List)}. Make sure to
+     * specify the correct input encoding.
+     *
+     * @param reader a reader providing the lines to be parsed
+     * @throws IOException
+     * @throws IllegalLineException
+     * @throws UnknownKeyException
+     * @throws RepeatedKeyException
+     * @throws UnknownSectionException
+     * @throws ParseException
+     */
+    protected void _parse(InputStreamReader reader) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
         BufferedReader bufferedReader = new BufferedReader(reader);
         List<String> lines = new ArrayList<>();
         try {
