@@ -28,10 +28,21 @@ import java.util.ListIterator;
  */
 public abstract class ArgKeyProcessor extends LinearFileParser.KeyProcessor {
 
+    /**
+     *
+     * @param key the key to be processed
+     * @param oneShot whether this key may only be used once in the section of
+     * this processor - when used a second time, {@link RepeatedKeyException} is
+     * thrown
+     */
     public ArgKeyProcessor(String key, boolean oneShot) {
         super(key, oneShot);
     }
 
+    /**
+     *
+     * @param key the key to be processed
+     */
     public ArgKeyProcessor(String key) {
         super(key);
     }

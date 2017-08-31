@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Felix Wiemuth
+ * Copyright (C) 2015, 2017 Felix Wiemuth
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * A line-based parser for simple textfiles with keywords. This is a base class
+ * A line-based parser for simple text files with keywords. This is a base class
  * which can be extended to implement a specific parser. The subclass should
  * provide a 'parse()' method which also returns the result.
  *
@@ -55,11 +55,13 @@ import java.util.ListIterator;
  * a new line, null disables comments)</li>
  * <li>sectionPrefix: indicates to switch to the section specified after the
  * prefix and switch to the corresponding parsing mode. If sectionPrefix is
- * null, sections are not switchted automatically. Sections can be switched
+ * null, sections are not switched automatically. Sections can be switched
  * manually by subclasses using {@link #changeSection}</li>
  * <li>keyPrefix: following this prefix is a key which specifies how the parser
  * should handle the current line</li>
  * </ul>
+ * Note that no space is expected after a prefix - if desired, a space must be
+ * added to the prefix itself.
  *
  * Every line is processed as follows (in the given order) where empty lines are
  * ignored if specified at construction. If it starts with
@@ -78,7 +80,7 @@ import java.util.ListIterator;
  * invoked. If the key is not found (was not registered with
  * {@link addKeyProcessor()}), then {@link UnknownKeyException} is thrown.</li>
  * </ul>
- * If the line starts with non of the listed prefixed, the line is passed to the
+ * If the line starts with non of the listed prefixes, the line is passed to the
  * default processor set by {@link #setDefaultProcessor()}. If no default
  * processor exists or if it returns false, then {@link IllegalLineException} is
  * thrown.
@@ -173,7 +175,7 @@ public class LinearFileParser {
          * @param line
          * @param it
          * @return true, if the line could be processed (false causes the parser
-         * to throw {@link IllegalLineException} automatically
+         * to throw {@link IllegalLineException})
          * @throws IllegalLineException
          */
         boolean run(String line, ListIterator<String> it) throws IllegalLineException, ParseException;
@@ -191,7 +193,7 @@ public class LinearFileParser {
 
         /**
          *
-         * @param actionOnEnter action to be perforemd before entering this
+         * @param actionOnEnter action to be performed before entering this
          * section (iterator points to first line after switching to the
          * section)
          * @param actionOnLeave action to be performed after leaving this
@@ -251,7 +253,7 @@ public class LinearFileParser {
     private Section section;
     private ListIterator<String> it;
     private final Section GLOBAL_PROCESSORS = new Section(); // processors valid in every section
-    private DefaultProcessor defaultProcessor; // to be used to process a line where not other processing applies
+    private DefaultProcessor defaultProcessor; // to be used to process a line where no other processing applies
 
     /**
      * Create a new parser without sections. Skips lines containing whitespaces
@@ -307,7 +309,7 @@ public class LinearFileParser {
      *
      * @param sectionID unique ID to identify the section and to refer to the
      * section in the file to be parses
-     * @param actionOnEnter action to be perforemd before entering this section
+     * @param actionOnEnter action to be performed before entering this section
      * (iterator points to first line after switching to the section)
      * @param actionOnLeave action to be performed after leaving this section
      * (iterator points to the line which specifies a new section or the last
@@ -323,7 +325,8 @@ public class LinearFileParser {
     }
 
     /**
-     * Same as {@code addSection(sectionID, null, null).
+     * Same as {@code addSection(sectionID, null, null)}.
+     *
      * @param sectionID
      * @throws SectionAlreadyExistsException
      */
@@ -405,7 +408,7 @@ public class LinearFileParser {
     /**
      * Convenience method for {@link #_parse(java.util.List)}.
      *
-     * @param file the file which lines should be parsed
+     * @param inputStream an input stream providing the lines to be parsed
      * @throws FileNotFoundException
      * @throws IOException
      * @throws UnknownSectionException
@@ -421,7 +424,7 @@ public class LinearFileParser {
     /**
      * Convenience method for {@link #_parse(java.util.List)}.
      *
-     * @param file the file which lines should be parsed
+     * @param file the file to be parsed
      * @throws FileNotFoundException
      * @throws IOException
      * @throws UnknownSectionException
@@ -462,8 +465,8 @@ public class LinearFileParser {
      * @throws IllegalLineException when the line was not identified as a
      * comment, a section specification or a key and the default processor (if
      * any) returned false
-     * @throws ParseException if not one of the previous, is only thrown by
-     * processors
+     * @throws ParseException if it is none of the mentioned subclasses, it is
+     * thrown by a key processor
      */
     protected void _parse(List<String> lines) throws UnknownSectionException, UnknownKeyException, RepeatedKeyException, IllegalLineException, ParseException {
         it = lines.listIterator();
