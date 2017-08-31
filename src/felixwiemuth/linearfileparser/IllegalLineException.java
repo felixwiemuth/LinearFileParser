@@ -17,6 +17,8 @@
 
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.R;
+
 /**
  * Indicates that a line is neither a comment, nor specifies a section or a key
  * and the default processor did not accept the line.
@@ -26,6 +28,11 @@ package felixwiemuth.linearfileparser;
 public class IllegalLineException extends ParseException {
 
     public IllegalLineException(int line) {
-        super(line, "Illegal start of line (expected comment, section or key).");
+        super(line);
+    }
+
+    @Override
+    protected String getMsg() {
+        return getRp().getString(R.ILLEGAL_LINE);
     }
 }

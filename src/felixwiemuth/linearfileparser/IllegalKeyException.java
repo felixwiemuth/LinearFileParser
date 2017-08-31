@@ -26,8 +26,8 @@ public class IllegalKeyException extends ParseException {
 
     private final String key;
 
-    public IllegalKeyException(int line, String key, String msg) {
-        super(line, msg);
+    public IllegalKeyException(int line, String key) {
+        super(line);
         this.key = key;
     }
 

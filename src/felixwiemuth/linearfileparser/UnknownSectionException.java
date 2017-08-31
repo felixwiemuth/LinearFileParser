@@ -17,6 +17,8 @@
 
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.R;
+
 /**
  * Indicates an attempt to switch to a section which was not defined.
  *
@@ -27,11 +29,17 @@ public class UnknownSectionException extends ParseException {
     private final String sectionID;
 
     public UnknownSectionException(int line, String sectionID) {
-        super(line, "The section \"" + sectionID + "\" is not known.");
+        super(line);
         this.sectionID = sectionID;
     }
 
     public String getSectionID() {
         return sectionID;
     }
+
+    @Override
+    protected String getMsg() {
+        return String.format(getRp().getString(R.UNKNOWN_SECTION), sectionID);
+    }
+
 }

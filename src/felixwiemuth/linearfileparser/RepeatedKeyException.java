@@ -17,6 +17,8 @@
 
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.R;
+
 /**
  * Indicates that a one-shot key has been used a second time.
  *
@@ -27,11 +29,16 @@ public class RepeatedKeyException extends IllegalKeyException {
     private final int firstOccurrence;
 
     public RepeatedKeyException(int line, String key, int firstOccurrence) {
-        super(line, key, "The key \"" + key + "\" was already used at line " + firstOccurrence + ".");
+        super(line, key);
         this.firstOccurrence = firstOccurrence;
     }
 
     public int getFirstOccurrence() {
         return firstOccurrence;
+    }
+
+    @Override
+    protected String getMsg() {
+        return String.format(getRp().getString(R.REPEATED_KEY), getKey(), firstOccurrence);
     }
 }

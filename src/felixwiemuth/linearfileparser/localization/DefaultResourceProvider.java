@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Felix Wiemuth
+ * Copyright (C) 2017 Felix Wiemuth
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package felixwiemuth.linearfileparser;
+package felixwiemuth.linearfileparser.localization;
 
-import felixwiemuth.linearfileparser.localization.R;
+import java.util.ResourceBundle;
 
 /**
- * Indicates that a line starts with the specification of an unknown key.
+ * The default {@link ResourceProvider} using the Strings from
+ * Strings.properties.
  *
  * @author Felix Wiemuth
  */
-public class UnknownKeyException extends IllegalKeyException {
-
-    public UnknownKeyException(int line, String key) {
-        super(line, key);
-    }
+public class DefaultResourceProvider implements ResourceProvider {
 
     @Override
-    protected String getMsg() {
-        return String.format(getRp().getString(R.UNKNOWN_KEY), getKey());
+    public String getString(R key) {
+        return ResourceBundle.getBundle("felixwiemuth.linearfileparser.localization.Strings").getString(key.name());
     }
 
 }

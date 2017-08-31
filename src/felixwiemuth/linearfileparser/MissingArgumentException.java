@@ -17,6 +17,8 @@
 
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.R;
+
 /**
  * Indicates that an argument is required for a key but not given.
  */
@@ -25,11 +27,16 @@ public class MissingArgumentException extends ParseException {
     private final String key;
 
     public MissingArgumentException(int line, String key) {
-        super(line, "Missing argument for key \"" + key + "\".");
+        super(line);
         this.key = key;
     }
 
     public String getKey() {
         return key;
+    }
+
+    @Override
+    protected String getMsg() {
+        return String.format(getRp().getString(R.MISSING_ARGUMENT), key);
     }
 }

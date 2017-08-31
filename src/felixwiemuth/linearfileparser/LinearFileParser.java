@@ -16,6 +16,8 @@
  */
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.DefaultResourceProvider;
+import felixwiemuth.linearfileparser.localization.ResourceProvider;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +25,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,8 @@ public class LinearFileParser {
      */
     public abstract static class KeyProcessor {
 
+        private ResourceProvider rp;
+
         public final String key;
         private final boolean oneShot;
         private int lastOccurrence = -1;
@@ -115,10 +118,20 @@ public class LinearFileParser {
             this(key, false);
         }
 
+        public void setResourceProvider(ResourceProvider rp) {
+            this.rp = rp;
+        }
+
+        protected ResourceProvider getRp() {
+            return rp;
+        }
+
         private void _process(String arg, ListIterator<String> it) throws RepeatedKeyException, ParseException {
             if (oneShot) {
                 if (lastOccurrence != -1) {
-                    throw new RepeatedKeyException(it.nextIndex(), key, lastOccurrence);
+                    RepeatedKeyException ex = new RepeatedKeyException(it.nextIndex(), key, lastOccurrence);
+                    ex.setResourceProvider(rp);
+                    throw ex;
                 } else {
                     lastOccurrence = it.nextIndex();
                 }
@@ -203,7 +216,9 @@ public class LinearFileParser {
 
         public void process(String key, String arg, ListIterator<String> it) throws UnknownKeyException, RepeatedKeyException, ParseException {
             if (!keyProcessors.containsKey(key)) {
-                throw new UnknownKeyException(getCurrentLineNumber(), key);
+                UnknownKeyException ex = new UnknownKeyException(getCurrentLineNumber(), key);
+                ex.setResourceProvider(rp);
+                throw ex;
             }
             keyProcessors.get(key)._process(arg, it);
         }
@@ -221,6 +236,8 @@ public class LinearFileParser {
         }
 
     }
+
+    private ResourceProvider rp = new DefaultResourceProvider();
 
     public final String START_SECTION;
 
@@ -281,6 +298,10 @@ public class LinearFileParser {
         this.SKIP_EMPTY_LINES = skipEmptyLines;
     }
 
+    public void setResourceProvider(ResourceProvider resourceProvider) {
+        this.rp = resourceProvider;
+    }
+
     /**
      * Add a new section to the parser.
      *
@@ -318,6 +339,7 @@ public class LinearFileParser {
      * specified key was already added using this method
      */
     protected final void addKeyProcessor(KeyProcessor keyProcessor) throws KeyProcessorAlreadyExistsException { //TODO make final (do not allow to overwrite method)?
+        keyProcessor.setResourceProvider(rp);
         GLOBAL_PROCESSORS.addKeyProcessor(keyProcessor);
     }
 
@@ -335,6 +357,7 @@ public class LinearFileParser {
      * specified key was already added to apply to all sections or this section.
      */
     protected final void addKeyProcessor(String sectionID, KeyProcessor keyProcessor) throws SectionNotExistsException, KeyProcessorAlreadyExistsException {
+        keyProcessor.setResourceProvider(rp);
         if (!sections.containsKey(sectionID)) {
             throw new SectionNotExistsException();
         }
@@ -370,7 +393,9 @@ public class LinearFileParser {
             throw new IllegalStateException("Implementation error (please contact developer): At line " + it.nextIndex() + ": Cannot change section when no initial section was specified at construction.");
         }
         if (!sections.containsKey(sectionID)) {
-            throw new UnknownSectionException(it.previousIndex(), sectionID);
+            UnknownSectionException ex = new UnknownSectionException(it.previousIndex(), sectionID);
+            ex.setResourceProvider(rp);
+            throw ex;
         }
         section.leave(it);
         section = sections.get(sectionID);
@@ -468,8 +493,15 @@ public class LinearFileParser {
                 }
             } else if (line.startsWith(keyPrefix)) {
                 parseKey(line, it);
-            } else if (defaultProcessor == null || !defaultProcessor.run(line, it)) {
-                throw new IllegalLineException(getCurrentLineNumber());
+            } else {
+                try {
+                    if (defaultProcessor == null || !defaultProcessor.run(line, it)) { // NOTE: 'run' can also throw IllegalLineException
+                        throw new IllegalLineException(getCurrentLineNumber());
+                    }
+                } catch (IllegalLineException ex) {
+                    ex.setResourceProvider(rp);
+                    throw ex;
+                }
             }
         }
         if (section != null) {

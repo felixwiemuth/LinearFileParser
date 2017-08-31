@@ -17,14 +17,21 @@
 
 package felixwiemuth.linearfileparser;
 
+import felixwiemuth.linearfileparser.localization.R;
+import felixwiemuth.linearfileparser.localization.ResourceProvider;
+
 /**
  * Indicates an error while parsing due to a not properly formatted source file
- * (syntax error).
+ * (syntax error). Messages are only constructed when calling {@link #getMessage()
+ * } (which includes reading resources). Messages requiring {@link #getRp() }
+ * are specified by overriding {@link #getMsg()
+ * }, if this is not overridden the usual exception message is used.
  *
  * @author Felix Wiemuth
  */
 public class ParseException extends Exception {
 
+    private ResourceProvider rp;
     private final int line;
 
     /**
@@ -47,6 +54,20 @@ public class ParseException extends Exception {
         this.line = line;
     }
 
+    public void setResourceProvider(ResourceProvider rp) {
+        this.rp = rp;
+    }
+
+    /**
+     * For library-internal use only: get the {@link ResourceProvider} set by
+     * {@link LinearFileParser}.
+     *
+     * @return
+     */
+    protected ResourceProvider getRp() {
+        return rp;
+    }
+
     public int getLine() {
         return line;
     }
@@ -58,7 +79,7 @@ public class ParseException extends Exception {
      */
     @Override
     public String getMessage() {
-        return buildMessage(super.getMessage());
+        return buildMessage(getMsg());
     }
 
     /**
@@ -70,11 +91,20 @@ public class ParseException extends Exception {
      */
     protected String buildMessage(String msg) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Error at line ").append(line);
+        sb.append(rp.getString(R.ERROR_AT_LINE)).append(line);
         if (msg != null) {
             sb.append(": ").append(msg);
         }
         return sb.toString();
     }
 
+    /**
+     * Get the message to be displayed. Default is {@link Exception#getMessage()
+     * }.
+     *
+     * @return
+     */
+    protected String getMsg() {
+        return super.getMessage();
+    }
 }

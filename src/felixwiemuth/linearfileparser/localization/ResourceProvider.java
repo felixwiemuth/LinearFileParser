@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Felix Wiemuth
+ * Copyright (C) 2017 Felix Wiemuth
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package felixwiemuth.linearfileparser;
-
-import felixwiemuth.linearfileparser.localization.R;
+package felixwiemuth.linearfileparser.localization;
 
 /**
- * Indicates that a line starts with the specification of an unknown key.
+ * An interface to allow localization of the library by providing resources (for
+ * now only String resources). Can be used with any existing localization
+ * framework (e.g. Android resources) by implementing an adapter. The adapter
+ * should map {@link R}s to resources of the other localization framework. If
+ * the latter uses Strings as keys, to ensure uniqueness use {@link R#name()
+ * } prefixed by "felixwiemuth.linearfileparser" as key.
  *
  * @author Felix Wiemuth
  */
-public class UnknownKeyException extends IllegalKeyException {
+public interface ResourceProvider {
 
-    public UnknownKeyException(int line, String key) {
-        super(line, key);
-    }
-
-    @Override
-    protected String getMsg() {
-        return String.format(getRp().getString(R.UNKNOWN_KEY), getKey());
-    }
+    String getString(R key);
 
 }

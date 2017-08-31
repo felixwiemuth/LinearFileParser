@@ -39,7 +39,9 @@ public abstract class ArgKeyProcessor extends LinearFileParser.KeyProcessor {
     @Override
     public void process(String arg, ListIterator<String> it) throws MissingArgumentException, ParseException {
         if (arg == null) {
-            throw new MissingArgumentException(it.nextIndex(), key);
+            MissingArgumentException ex = new MissingArgumentException(it.nextIndex(), key);
+            ex.setResourceProvider(getRp());
+            throw ex;
         }
         _process(arg, it);
     }
