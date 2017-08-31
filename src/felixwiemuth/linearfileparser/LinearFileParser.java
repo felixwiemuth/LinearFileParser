@@ -249,7 +249,6 @@ public class LinearFileParser {
     private final boolean SKIP_EMPTY_LINES;
     private final HashMap<String, Section> sections = new HashMap<>(); // section -> key -> processor
 
-    private BufferedReader reader;
     private Section section;
     private ListIterator<String> it;
     private final Section GLOBAL_PROCESSORS = new Section(); // processors valid in every section
