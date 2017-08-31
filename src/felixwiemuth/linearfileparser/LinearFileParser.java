@@ -439,12 +439,16 @@ public class LinearFileParser {
     private void _parse(InputStreamReader reader) throws IOException, IllegalLineException, UnknownKeyException, RepeatedKeyException, UnknownSectionException, ParseException {
         BufferedReader bufferedReader = new BufferedReader(reader);
         List<String> lines = new ArrayList<>();
-        while (true) {
-            String line = bufferedReader.readLine();
-            if (line == null) {
-                break;
+        try {
+            while (true) {
+                String line = bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
+                lines.add(line);
             }
-            lines.add(line);
+        } finally {
+            bufferedReader.close();
         }
         _parse(lines);
     }
