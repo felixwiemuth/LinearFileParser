@@ -176,7 +176,9 @@ public class LinearFileParser {
          * @param it
          * @return true, if the line could be processed (false causes the parser
          * to throw {@link IllegalLineException})
-         * @throws IllegalLineException
+         * @throws IllegalLineException to indicate that this line does not
+         * correspond to the expected format (a detailed error message should be
+         * provided, otherwise the default message is used)
          */
         boolean run(String line, ListIterator<String> it) throws IllegalLineException, ParseException;
     }

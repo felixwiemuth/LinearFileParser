@@ -27,12 +27,23 @@ import felixwiemuth.linearfileparser.localization.R;
  */
 public class IllegalLineException extends ParseException {
 
+    private String msg;
+
     public IllegalLineException(int line) {
         super(line);
     }
 
+    public IllegalLineException(int line, String msg) {
+        super(line);
+        this.msg = msg;
+    }
+
     @Override
     protected String getMsg() {
-        return getRp().getString(R.ILLEGAL_LINE);
+        if (msg == null) {
+            return getRp().getString(R.ILLEGAL_LINE);
+        } else {
+            return msg;
+        }
     }
 }
