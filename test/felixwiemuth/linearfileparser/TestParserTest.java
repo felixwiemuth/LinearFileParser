@@ -65,6 +65,21 @@ public class TestParserTest {
         parser.parse(new File("test/felixwiemuth/linearfileparser/TestFile2"));
     }
 
+    /**
+     * Asserts that {@link TestParser3} does not throw exceptions for the valid
+     * test file.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws UnknownSectionException
+     * @throws ParseException
+     */
+    @Test
+    public void test3() throws IOException, FileNotFoundException, UnknownSectionException, ParseException {
+        TestParser3 parser = new TestParser3();
+        parser.parse(new File("test/felixwiemuth/linearfileparser/TestFile3"));
+    }
+
     @BeforeClass
     public static void setUpClass() throws Exception {
     }

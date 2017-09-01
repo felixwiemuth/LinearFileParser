@@ -1,0 +1,19 @@
+// Fun
+>> Hello World.
+>> Let's switch to section 1 to find its magic.
+@sec 1
+>> Trying...
+>> $
+>> !
+Something else...
+>>?
+>> 1
+>> Found it, let's go to section 2.
+@sec 2
+>>?
+>> Still not useful...
+>> second
+>> That's it! Let's find the last one.
+@sec 3
+>> 3rd
+>> That was easy.
