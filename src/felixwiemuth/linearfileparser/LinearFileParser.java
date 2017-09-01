@@ -504,7 +504,7 @@ public class LinearFileParser {
             } else if (commentPrefix != null && line.startsWith(commentPrefix)) {
                 // skip this line
             } else if (sectionPrefix != null && line.startsWith(sectionPrefix)) {
-                String sectionID = line.substring(keyPrefix.length());
+                String sectionID = line.substring(sectionPrefix.length());
                 try {
                     changeSection(sectionID);
                 } catch (UnknownSectionException ex) {
