@@ -25,7 +25,12 @@ import felixwiemuth.linearfileparser.localization.ResourceProvider;
  * (syntax error). Messages are only constructed when calling {@link #getMessage()
  * } (which includes reading resources). Messages requiring {@link #getRp() }
  * are specified by overriding {@link #getMsg()
- * }, if this is not overridden the usual exception message is used.
+ * }, if this is not overridden the usual exception message is used. IMPORTANT:
+ * Every {@link ParseException} thrown outside a
+ * {@link felixwiemuth.linearfileparser.LinearFileParser.KeyProcessor} must be
+ * passed to {@link LinearFileParser#setupException(felixwiemuth.linearfileparser.ParseException)
+ * }. For convenience use {@link LinearFileParser#newParseException(int, java.lang.String)
+ * }.
  *
  * @author Felix Wiemuth
  */

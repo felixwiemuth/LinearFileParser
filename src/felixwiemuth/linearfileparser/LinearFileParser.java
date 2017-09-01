@@ -94,8 +94,6 @@ public class LinearFileParser {
      */
     public abstract static class KeyProcessor {
 
-        private ResourceProvider rp;
-
         public final String key;
         private final boolean oneShot;
         private int lastOccurrence = -1;
@@ -120,20 +118,10 @@ public class LinearFileParser {
             this(key, false);
         }
 
-        public void setResourceProvider(ResourceProvider rp) {
-            this.rp = rp;
-        }
-
-        protected ResourceProvider getRp() {
-            return rp;
-        }
-
         private void _process(String arg, ListIterator<String> it) throws RepeatedKeyException, ParseException {
             if (oneShot) {
                 if (lastOccurrence != -1) {
-                    RepeatedKeyException ex = new RepeatedKeyException(it.nextIndex(), key, lastOccurrence);
-                    ex.setResourceProvider(rp);
-                    throw ex;
+                    throw new RepeatedKeyException(it.nextIndex(), key, lastOccurrence);
                 } else {
                     lastOccurrence = it.nextIndex();
                 }
@@ -177,8 +165,9 @@ public class LinearFileParser {
          * @return true, if the line could be processed (false causes the parser
          * to throw {@link IllegalLineException})
          * @throws IllegalLineException to indicate that this line does not
-         * correspond to the expected format (a detailed error message should be
-         * provided, otherwise the default message is used)
+         * correspond to the expected (general) format (a detailed error message
+         * should be provided, otherwise the default message is used)
+         * @throws ParseException to indicate another error on the line
          */
         boolean run(String line, ListIterator<String> it) throws IllegalLineException, ParseException;
     }
@@ -347,7 +336,6 @@ public class LinearFileParser {
      * specified key was already added using this method
      */
     protected final void addKeyProcessor(KeyProcessor keyProcessor) throws KeyProcessorAlreadyExistsException { //TODO make final (do not allow to overwrite method)?
-        keyProcessor.setResourceProvider(rp);
         GLOBAL_PROCESSORS.addKeyProcessor(keyProcessor);
     }
 
@@ -365,7 +353,6 @@ public class LinearFileParser {
      * specified key was already added to apply to all sections or this section.
      */
     protected final void addKeyProcessor(String sectionID, KeyProcessor keyProcessor) throws SectionNotExistsException, KeyProcessorAlreadyExistsException {
-        keyProcessor.setResourceProvider(rp);
         if (!sections.containsKey(sectionID)) {
             throw new SectionNotExistsException();
         }
@@ -509,40 +496,38 @@ public class LinearFileParser {
         assertSectionNotNull();
         section.enter(it);
 
-        while (it.hasNext()) {
-            line = it.next();
-            if (SKIP_EMPTY_LINES && line.trim().isEmpty()) {
-                // skip this line
-            } else if (commentPrefix != null && line.startsWith(commentPrefix)) {
-                // skip this line
-            } else if (sectionPrefix != null && line.startsWith(sectionPrefix)) {
-                String sectionID = line.substring(sectionPrefix.length());
-                if (sections.containsKey(sectionID)) {
-                    changeSection(sectionID);
-                } else if (sectionPrefix.equals(keyPrefix)) {
-                    // if sectionPrefix and keyPrefix are equal, we could also have a regular key here, so check for keys next
+        // Any ParseException thrown in this block will be set up with the given ResourceProvider
+        try {
+            while (it.hasNext()) {
+                line = it.next();
+                if (SKIP_EMPTY_LINES && line.trim().isEmpty()) {
+                    // skip this line
+                } else if (commentPrefix != null && line.startsWith(commentPrefix)) {
+                    // skip this line
+                } else if (sectionPrefix != null && line.startsWith(sectionPrefix)) {
+                    String sectionID = line.substring(sectionPrefix.length());
+                    if (sections.containsKey(sectionID)) {
+                        changeSection(sectionID);
+                    } else if (sectionPrefix.equals(keyPrefix)) {
+                        // if sectionPrefix and keyPrefix are equal, we could also have a regular key here, so check for keys next
+                        parseKey(line, it);
+                    } else {
+                        throw new UnknownSectionException(it.previousIndex(), sectionID);
+                    }
+                } else if (line.startsWith(keyPrefix)) {
                     parseKey(line, it);
                 } else {
-                    UnknownSectionException ex = new UnknownSectionException(it.previousIndex(), sectionID);
-                    ex.setResourceProvider(rp);
-                    throw ex;
-                }
-            } else if (line.startsWith(keyPrefix)) {
-                parseKey(line, it);
-            } else {
-                try {
-                    if (defaultProcessor == null || !defaultProcessor.run(line, it)) { // NOTE: 'run' can also throw IllegalLineException
+                    if (defaultProcessor == null || !defaultProcessor.run(line, it)) { // NOTE: 'run' can also throw IllegalLineException and ParseException
                         throw new IllegalLineException(getCurrentLineNumber());
                     }
-                } catch (IllegalLineException ex) {
-                    ex.setResourceProvider(rp);
-                    throw ex;
                 }
             }
+        } catch (ParseException ex) {
+            ex.setResourceProvider(rp);
+            throw ex;
         }
 
         assertSectionNotNull();
-
         section.leave(it);
     }
 
@@ -564,10 +549,17 @@ public class LinearFileParser {
         } else if (GLOBAL_PROCESSORS.containsKey(key)) {
             GLOBAL_PROCESSORS.process(key, arg, it);
         } else {
-            UnknownKeyException ex = new UnknownKeyException(key, getCurrentLineNumber(), getCurrentSectionID());
-            ex.setResourceProvider(rp);
-            throw ex;
+            throw new UnknownKeyException(key, getCurrentLineNumber(), getCurrentSectionID());
         }
+    }
+
+    protected ParseException setupException(ParseException ex) {
+        ex.setResourceProvider(rp);
+        return ex;
+    }
+
+    protected ParseException newParseException(int line, String msg) {
+        return setupException(new ParseException(line, msg));
     }
 
     private void assertSectionNotNull() {
