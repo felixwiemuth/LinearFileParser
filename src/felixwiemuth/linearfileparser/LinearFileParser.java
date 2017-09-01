@@ -75,10 +75,10 @@ import java.util.ListIterator;
  * <li>the keyPrefix, the following substring ending before the next whitespace
  * is identified as a key and passed to a registered {@link KeyProcessor} with
  * everything after the whitespace as argument (or null as argument if the line
- * ends after the key). First it is looked for a global processor for this key
- * and then for a processor for the current section. Only the first one found is
- * invoked. If the key is not found (was not registered with
- * {@link addKeyProcessor()}), then {@link UnknownKeyException} is thrown.</li>
+ * ends after the key). If a processor for the current section exists, it is
+ * executed. If not, the global processor for the key is invoked. If the key is
+ * not found (was not registered with {@link addKeyProcessor()}), then
+ * {@link UnknownKeyException} is thrown.</li>
  * </ul>
  * If the line starts with non of the listed prefixes, the line is passed to the
  * default processor set by {@link #setDefaultProcessor()}. If no default
@@ -185,16 +185,17 @@ public class LinearFileParser {
 
     private class Section {
 
+        private final String ID;
         private final Action actionOnEnter;
         private final Action actionOnLeave;
         private final HashMap<String, KeyProcessor> keyProcessors = new HashMap<>();
 
-        public Section() {
-            this(null, null);
+        public Section(String id) {
+            this(id, null, null);
         }
 
         /**
-         *
+         * @param id the ID of this section
          * @param actionOnEnter action to be performed before entering this
          * section (iterator points to first line after switching to the
          * section)
@@ -202,9 +203,14 @@ public class LinearFileParser {
          * section (iterator points to the line which specifies a new section or
          * the last line if all lines were processed)
          */
-        public Section(Action actionOnEnter, Action actionOnLeave) {
+        public Section(String id, Action actionOnEnter, Action actionOnLeave) {
+            this.ID = id;
             this.actionOnEnter = actionOnEnter;
             this.actionOnLeave = actionOnLeave;
+        }
+
+        public String getID() {
+            return ID;
         }
 
         public void addKeyProcessor(KeyProcessor keyProcessor) throws KeyProcessorAlreadyExistsException {
@@ -219,10 +225,8 @@ public class LinearFileParser {
         }
 
         public void process(String key, String arg, ListIterator<String> it) throws UnknownKeyException, RepeatedKeyException, ParseException {
-            if (!keyProcessors.containsKey(key)) {
-                UnknownKeyException ex = new UnknownKeyException(getCurrentLineNumber(), key);
-                ex.setResourceProvider(rp);
-                throw ex;
+            if (!containsKey(key)) {
+                throw new IllegalStateException("Implementation error (please contact developer): no key processor for the given key.");
             }
             keyProcessors.get(key)._process(arg, it);
         }
@@ -243,7 +247,7 @@ public class LinearFileParser {
 
     private ResourceProvider rp = new DefaultResourceProvider();
 
-    public final String START_SECTION;
+    public final String START_SECTION; // if null, GLOBAL_PROCESSORS is used as start section
 
     private final String commentPrefix;
     private final String sectionPrefix;
@@ -251,9 +255,9 @@ public class LinearFileParser {
     private final boolean SKIP_EMPTY_LINES;
     private final HashMap<String, Section> sections = new HashMap<>(); // section -> key -> processor
 
-    private Section section;
+    private Section section; // is set by _parse, will then never be null
     private ListIterator<String> it;
-    private final Section GLOBAL_PROCESSORS = new Section(); // processors valid in every section
+    private final Section GLOBAL_PROCESSORS = new Section(""); // processors valid in every section
     private DefaultProcessor defaultProcessor; // to be used to process a line where no other processing applies
 
     /**
@@ -322,7 +326,7 @@ public class LinearFileParser {
         if (sections.containsKey(sectionID)) {
             throw new SectionAlreadyExistsException();
         }
-        sections.put(sectionID, new Section(actionOnEnter, actionOnLeave));
+        sections.put(sectionID, new Section(sectionID, actionOnEnter, actionOnLeave));
     }
 
     /**
@@ -387,22 +391,28 @@ public class LinearFileParser {
     }
 
     /**
+     * Get the ID of the current section.
+     *
+     * @return
+     */
+    protected String getCurrentSectionID() {
+        return section.getID();
+    }
+
+    /**
      * Manually switch to a section.
      *
      * @param sectionID
      * @throws UnknownSectionException
      */
     protected void changeSection(String sectionID) throws UnknownSectionException {
-        if (section == null) {
-            throw new IllegalStateException("Implementation error (please contact developer): At line " + it.nextIndex() + ": Cannot change section when no initial section was specified at construction.");
-        }
-        if (!sections.containsKey(sectionID)) {
-            UnknownSectionException ex = new UnknownSectionException(it.previousIndex(), sectionID);
-            ex.setResourceProvider(rp);
-            throw ex;
+        assertSectionNotNull();
+        if (!sections.containsKey(sectionID)) { // this can still happen when a key processor calls this method
+            throw new UnknownSectionException(getCurrentLineNumber(), sectionID);
         }
         section.leave(it);
         section = sections.get(sectionID);
+        assertSectionNotNull();
         section.enter(it);
     }
 
@@ -493,9 +503,11 @@ public class LinearFileParser {
         it = lines.listIterator();
         String line;
         section = sections.get(START_SECTION);
-        if (section != null) {
-            section.enter(it);
+        if (section == null) {
+            section = GLOBAL_PROCESSORS;
         }
+        assertSectionNotNull();
+        section.enter(it);
 
         while (it.hasNext()) {
             line = it.next();
@@ -505,15 +517,15 @@ public class LinearFileParser {
                 // skip this line
             } else if (sectionPrefix != null && line.startsWith(sectionPrefix)) {
                 String sectionID = line.substring(sectionPrefix.length());
-                try {
+                if (sections.containsKey(sectionID)) {
                     changeSection(sectionID);
-                } catch (UnknownSectionException ex) {
+                } else if (sectionPrefix.equals(keyPrefix)) {
                     // if sectionPrefix and keyPrefix are equal, we could also have a regular key here, so check for keys next
-                    if (sectionPrefix.equals(keyPrefix)) {
-                        parseKey(line, it);
-                    } else {
-                        throw ex;
-                    }
+                    parseKey(line, it);
+                } else {
+                    UnknownSectionException ex = new UnknownSectionException(it.previousIndex(), sectionID);
+                    ex.setResourceProvider(rp);
+                    throw ex;
                 }
             } else if (line.startsWith(keyPrefix)) {
                 parseKey(line, it);
@@ -528,9 +540,10 @@ public class LinearFileParser {
                 }
             }
         }
-        if (section != null) {
-            section.leave(it);
-        }
+
+        assertSectionNotNull();
+
+        section.leave(it);
     }
 
     private void parseKey(String line, ListIterator<String> it) throws UnknownKeyException, RepeatedKeyException, ParseException {
@@ -545,14 +558,21 @@ public class LinearFileParser {
                 arg = keyArg.substring(startArg);
             }
         }
-        try {
+        assertSectionNotNull();
+        if (section.containsKey(key)) {
+            section.process(key, arg, it);
+        } else if (GLOBAL_PROCESSORS.containsKey(key)) {
             GLOBAL_PROCESSORS.process(key, arg, it);
-        } catch (UnknownKeyException ex) {
-            if (section != null) {
-                section.process(key, arg, it);
-            } else {
-                throw ex;
-            }
+        } else {
+            UnknownKeyException ex = new UnknownKeyException(key, getCurrentLineNumber(), getCurrentSectionID());
+            ex.setResourceProvider(rp);
+            throw ex;
+        }
+    }
+
+    private void assertSectionNotNull() {
+        if (section == null) {
+            throw new IllegalStateException("Assertion failed: Implementation error (please contact developer): section==null");
         }
     }
 }

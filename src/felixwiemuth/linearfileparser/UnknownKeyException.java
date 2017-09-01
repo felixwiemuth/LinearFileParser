@@ -26,13 +26,19 @@ import felixwiemuth.linearfileparser.localization.R;
  */
 public class UnknownKeyException extends IllegalKeyException {
 
-    public UnknownKeyException(int line, String key) {
+    private final String section;
+
+    public UnknownKeyException(String section, int line, String key) {
         super(line, key);
+        this.section = section;
+    }
+
+    public String getSection() {
+        return section;
     }
 
     @Override
     protected String getMsg() {
-        return String.format(getRp().getString(R.UNKNOWN_KEY), getKey());
+        return String.format(getRp().getString(R.UNKNOWN_KEY), getKey(), getSection());
     }
-
 }
