@@ -78,7 +78,8 @@ public class ParseException extends Exception {
     }
 
     /**
-     * Returns the detail message prefixed with the line number.
+     * Returns the detail message prefixed with the {@link R#ERROR_AT_LINE}
+     * string and the line number.
      *
      * @return
      */
@@ -94,7 +95,7 @@ public class ParseException extends Exception {
      * @param msg
      * @return
      */
-    protected String buildMessage(String msg) {
+    private String buildMessage(String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append(rp.getString(R.ERROR_AT_LINE)).append(line);
         if (msg != null) {

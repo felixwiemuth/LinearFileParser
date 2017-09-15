@@ -47,7 +47,10 @@ import java.util.ListIterator;
  *
  * Subclasses can keep state while parsing to be referred to between different
  * calls to the processors. In the processors, further lines can be parsed
- * manually using the parser's iterator on the list of lines.
+ * manually using the parser's iterator on the list of lines. In Subclasses as
+ * well as processors individual exceptions can be thrown using
+ * {@link ParseException} or subclasses (note important information in the
+ * documentation).
  *
  * When creating a parser, three types of line prefixes can be defined:
  * <ul>
@@ -553,11 +556,28 @@ public class LinearFileParser {
         }
     }
 
+    /**
+     * Initialize a {@link ParseException} with required information such that {@link ParseException#getMessage()
+     * } can be used. This is required when manually throwing
+     * {@link ParseException}s to the user of {@link LinearFileParser}.
+     *
+     * @param ex
+     * @return
+     */
     protected ParseException setupException(ParseException ex) {
         ex.setResourceProvider(rp);
         return ex;
     }
 
+    /**
+     * Create a {@link ParseException} which is initialized by this
+     * {@link LinearFileParser}. Equivalent to calling {@link #setupException(felixwiemuth.linearfileparser.ParseException)
+     * } on an instance of {@link ParseException}.
+     *
+     * @param line
+     * @param msg
+     * @return
+     */
     protected ParseException newParseException(int line, String msg) {
         return setupException(new ParseException(line, msg));
     }
